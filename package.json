@@ -1,7 +1,7 @@
 {
   "name": "discord-activity-starter",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A minimal starter project using embedded-app-sdk",
   "main": "index.js",
   "scripts": {
