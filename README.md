@@ -1,74 +1,53 @@
-# @discord/embedded-app-sdk
+# Discord Embedded App Starter
 
-<p align="center">
-  <img src="/assets/discord-embedded-apps.svg" alt="Discord Embedded App SDK" />
-<p>
+This repo is a minimal starter-project. Getting an embedded app running in Discord can be complex. The goal of this example is to get you up-and-running as quickly as possible, while making it easy to swap in pieces to fit your embedded app's client and server needs.
 
-### The Embedded App SDK enables you to build rich, multiplayer experiences inside Discord.
+## Client architecture
 
-Activities are multiplayer games and social experiences in Discord. An Activity is a web application hosted in an iframe that can run within the Discord client on desktop, web, or mobile. The Embedded App SDK handles the communication between Discord and your iframed application.
+The client (aka front-end) is using [ViteJS](https://vitejs.dev/)'s Vanilla Typescript starter project. Vite has great starter projects in [many common javascript frameworks](https://vitejs.dev/guide/#trying-vite-online). All of these projects use the same config setup, which means that if you prefer React, Svelte, etc... you can swap frameworks and still get the following:
 
-Read more about building Discord Activities with the Embedded App SDK on [https://discord.com/developers/docs/activities/overview](https://discord.com/developers/docs/activities/overview).
+- Fast typescript bundling with hot-module-reloading
+- Identical configuration API
+- Identical environment variable API
 
-## Resources
+Note: ViteJS is not required to use Discord's `embedded-app-sdk`. ViteJS is a meta-client-framework we are using to make it easy to help you get running quickly, but the core concepts of developing an embedded application are the same, regardless of how you are consuming `embedded-app-sdk`.
 
-- **[Embedded App SDK Docs](https://discord.com/developers/docs/developer-tools/embedded-app-sdk)** - Get familiar with the Embedded App SDK
-- **[Activity Examples](/examples/)** - Explore examples of Discord Activities
-- **[Technical chat on Discord](https://discord.com/invite/discord-developers)** - Join us and other devs at DDevs at `#activities-dev-help`
+## Server architecture
 
-## Installing this package
+The server (aka back-end) is using Express with typescript. Any file in the server project can be imported by the client, in case you need to share business logic.
 
-```shell
-npm install @discord/embedded-app-sdk
+## Setting up your Discord Application
+
+Before we write any code, lets follow the instructions [here](https://discord.com/developers/docs/activities/building-an-activity#step-1-creating-a-new-app) to make sure your Discord application is set up correctly.
+
+## Setting up your environment variables
+
+In this directory (`/examples/discord-activity-starter`) we need to create a `.env` file with the OAuth2 variables, as described [here](https://discord.com/developers/docs/activities/building-an-activity#find-your-oauth2-credentials).
+
+```env
+VITE_CLIENT_ID=123456789012345678
+CLIENT_SECRET=abcdefghijklmnopqrstuvwxyzabcdef
 ```
 
-## Usage
+### Adding a new environment variable
 
-To use the SDK, import it into your project and construct a new instance of the DiscordSDK class.
+In order to add new environment variables, you will need to do the following:
 
-Below is a minimal example of setting up the SDK.
-Visit [/examples/discord-activity-starter](/examples/discord-activity-starter/README.md) for a complete example application. See more info on environment variables (`YOUR_OAUTH2_CLIENT_ID`, etc...) [here](https://discord.com/developers/docs/activities/building-an-activity#find-your-oauth2-credentials).
+1. Add the environment key and value to `.env`
+2. Add the key to [/examples/discord-activity-starter/packages/client/src/vite-env.d.ts](/examples/discord-activity-starter/packages/client/src/vite-env.d.ts)
+3. Add the key to [/examples/discord-activity-starter/packages/server/environment.d.ts](/examples/discord-activity-starter/packages/server/environment.d.ts)
 
-```typescript
-import {DiscordSDK} from '@discord/embedded-app-sdk';
-const discordSdk = new DiscordSDK(YOUR_OAUTH2_CLIENT_ID);
+This will ensure that you have type safety when consuming your environment variables
 
-async function setup() {
-  // Wait for READY payload from the discord client
-  await discordSdk.ready();
+## Running your app locally
 
-  // Pop open the OAuth permission modal and request for access to scopes listed in scope array below
-  const {code} = await discordSdk.commands.authorize({
-    client_id: YOUR_OAUTH2_CLIENT_ID,
-    response_type: 'code',
-    state: '',
-    prompt: 'none',
-    scope: ['identify', 'applications.commands'],
-  });
+As described [here](https://discord.com/developers/docs/activities/building-an-activity#step-4-running-your-app-locally-in-discord), we encourage using a tunnel solution such as [cloudflared](https://github.com/cloudflare/cloudflared#installing-cloudflared) for local development.
+To run your app locally, run the following from this directory (/examples/discord-activity-starter)
 
-  // Retrieve an access_token from your application's server
-  const response = await fetch('/api/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      code,
-    }),
-  });
-  const {access_token} = await response.json();
-
-  // Authenticate with Discord client (using the access_token)
-  auth = await discordSdk.commands.authenticate({
-    access_token,
-  });
-}
+```
+pnpm install # only need to run this the first time
+pnpm dev
+pnpm tunnel # from another terminal
 ```
 
-## SDK development
-
-Developing a new feature or patching a bug on the SDK? Check out [this guide](/docs/local-sdk-development.md) to learn how to set up your local dev environment.
-
-## Discord Developer Terms of Service & Developer Policy
-
-Please note that while this SDK is licensed under the MIT License, the [Discord Developer Terms of Service](https://discord.com/developers/docs/policies-and-agreements/developer-terms-of-service) and [Discord Developer Policy](https://discord.com/developers/docs/policies-and-agreements/developer-policy) otherwise still apply to you and the applications you develop utilizing this SDK.
+Be sure to complete all the steps listed [here](https://discord.com/developers/docs/activities/building-an-activity) to ensure your development setup is working as expected.
